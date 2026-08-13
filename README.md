@@ -6,6 +6,19 @@ Zound is a modern, minimalist, monochrome music player designed for listening to
 
 Built entirely with **HTML, CSS, and Vanilla JavaScript**, Zound provides a personal music library directly in the browser.
 
+### 🎵 Test Tracks
+
+I've added **5 of my FAVORITE songs** for you to try out Zound. (All tracks are from **The Birthday Massacre**)
+
+| File                     | Artist                | Album                    | Year |
+| ------------------------ | --------------------- | ------------------------ | ---: |
+| **Sleep Tonight.mp3**    | The Birthday Massacre | *Pathways*               | 2025 |
+| **Sleepwalking.mp3**     | The Birthday Massacre | *Pins and Needles*       | 2010 |
+| **Pins And Needles.mp3** | The Birthday Massacre | *Pins and Needles*       | 2010 |
+| **Red Stars.mp3**        | The Birthday Massacre | *Walking With Strangers* | 2007 |
+| **In The Dark.mp3**      | The Birthday Massacre | *Pins and Needles*       | 2010 |
+
+
 ## 🎵 Personal Music Library
 
 Import and manage your own music files directly through the browser. Supported formats depend on browser compatibility, including:
