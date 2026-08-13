@@ -1,4 +1,22 @@
-const MUSIC_LIBRARY = [];
+const MUSIC_LIBRARY = [
+
+  {
+    title: "Sleep Tonight", artist: "The Birthday Massacre", album: "Pathways (2025)", src: "music/Sleep_Tonight.mp3"
+  },
+  {
+    title: "Sleepwalking", artist: "The Birthday Massacre", album: "Pins and Needles (2010)", src: "music/Sleepwalking.mp3"
+  },
+  {
+    title: "Pins and Needles", artist: "The Birthday Massacre", album: "Pins and Needles (2010)", src: "music/Pins_and_Needles.mp3"
+  },
+  {
+    title: "Red Stars", artist: "The Birthday Massacre", album: "Walking With Strangers (2007)", src: "music/Red_Stars.mp3"
+  },
+  {
+    title: "In The Dark", artist: "The Birthday Massacre", album: "Pins and Needles (2010)", src: "music/In_The_Dark.mp3"
+  }
+
+];
 
 function formatDuration(totalSeconds) {
   if (!isFinite(totalSeconds) || totalSeconds < 0) return '--:--';
