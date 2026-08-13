@@ -7,7 +7,7 @@ const MUSIC_LIBRARY = [
     title: "Sleepwalking", artist: "The Birthday Massacre", album: "Pins and Needles (2010)", src: "music/Sleepwalking.mp3"
   },
   {
-    title: "Pins and Needles", artist: "The Birthday Massacre", album: "Pins and Needles (2010)", src: "music/Pins_and_Needles.mp3"
+    title: "Pins and Needles", artist: "The Birthday Massacre", album: "Pins and Needles (2010)", src: "music/Pins_And_Needles.mp3"
   },
   {
     title: "Red Stars", artist: "The Birthday Massacre", album: "Walking With Strangers (2007)", src: "music/Red_Stars.mp3"
