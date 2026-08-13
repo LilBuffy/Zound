@@ -6,6 +6,16 @@ Zound is a modern, minimalist, monochrome music player designed for listening to
 
 Built entirely with **HTML, CSS, and Vanilla JavaScript**, Zound provides a personal music library directly in the browser.
 
+🟢 Project Status
+
+STILL WORKING / BUT ABANDONED
+
+Click me: https://lilbuffy.github.io/Zound/
+
+Zound is no longer actively developed, but the current version is still functional and usable.
+
+The project is online, the music player still works, and the existing features are still available.
+
 ### 🎵 Test Tracks
 
 I've added **5 of my FAVORITE songs** for you to try out Zound. (All tracks are from **The Birthday Massacre**)
