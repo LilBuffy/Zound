@@ -1,19 +1,43 @@
 const MUSIC_LIBRARY = [
 
   {
-    title: "Sleep Tonight", artist: "The Birthday Massacre", album: "Pathways (2025)", src: "music/Sleep_Tonight.mp3"
+    title: "Sleep Tonight",
+    artist: "The Birthday Massacre",
+    album: "Pathways (2025)",
+    src: "music/Sleep_Tonight.mp3",
+    artwork: "music/artwork/sleep_tonight.jpg"
   },
   {
-    title: "Sleepwalking", artist: "The Birthday Massacre", album: "Pins and Needles (2010)", src: "music/Sleepwalking.mp3"
+    title: "Pins and Needles",
+    artist: "The Birthday Massacre",
+    album: "Pins and Needles (2010)",
+    src: "music/Pins_And_Needles.mp3",
+    artwork: "music/artwork/pins_and_needles.jpg"
   },
   {
+<<<<<<< Updated upstream
     title: "Pins and Needles", artist: "The Birthday Massacre", album: "Pins and Needles (2010)", src: "music/Pins_And_Needles.mp3"
+=======
+    title: "Sleepwalking",
+    artist: "The Birthday Massacre",
+    album: "Pins and Needles (2010)",
+    src: "music/Sleepwalking.mp3",
+    artwork: "music/artwork/sleepwalking.jpg"
+>>>>>>> Stashed changes
   },
   {
-    title: "Red Stars", artist: "The Birthday Massacre", album: "Walking With Strangers (2007)", src: "music/Red_Stars.mp3"
+    title: "Red Stars",
+    artist: "The Birthday Massacre",
+    album: "Walking With Strangers (2007)",
+    src: "music/Red_Stars.mp3",
+    artwork: "music/artwork/red_stars.jpg"
   },
   {
-    title: "In The Dark", artist: "The Birthday Massacre", album: "Pins and Needles (2010)", src: "music/In_The_Dark.mp3"
+    title: "In The Dark",
+    artist: "The Birthday Massacre",
+    album: "Pins and Needles (2010)",
+    src: "music/In_The_Dark.mp3",
+    artwork: "music/artwork/in_the_dark.jpg"
   }
 
 ];
@@ -146,6 +170,25 @@ const LibraryData = (() => {
     if (song) revokeUrls(song);
     songs = songs.filter(s => s.id !== id);
     await Store.delete(id);
+    Prefs.purgeSongIds([id]);
+  }
+
+  /** Delete several imported songs at once (used by the "Delete Selected"
+   *  bulk action). Bundled songs are skipped since they're config, not
+   *  stored data — there's nothing in IndexedDB to delete for them. */
+  async function removeManyImported(ids) {
+    const idsToDelete = ids.filter(id => {
+      const s = songs.find(x => x.id === id);
+      return s && !s.isBundled;
+    });
+    idsToDelete.forEach(id => {
+      const song = songs.find(s => s.id === id);
+      if (song) revokeUrls(song);
+    });
+    songs = songs.filter(s => !idsToDelete.includes(s.id));
+    await Promise.all(idsToDelete.map(id => Store.delete(id)));
+    Prefs.purgeSongIds(idsToDelete);
+    return idsToDelete;
   }
 
   async function clearImported() {
@@ -154,13 +197,30 @@ const LibraryData = (() => {
     await Store.clear();
   }
 
+  /** Attach a manually-chosen image as a song's artwork (imported songs
+   *  only — bundled tracks are static config with nowhere to persist an
+   *  override). Overwrites any existing embedded artwork for that song. */
+  async function setArtwork(songId, imageFile) {
+    const song = songs.find(s => s.id === songId);
+    if (!song || song.isBundled) return false;
+    const record = await Store.get(songId);
+    if (!record) return false;
+    record.pictureBlob = imageFile;
+    await Store.put(record);
+    if (song.artworkUrl && song.artworkUrl.startsWith('blob:')) URL.revokeObjectURL(song.artworkUrl);
+    song.artworkUrl = URL.createObjectURL(imageFile);
+    return true;
+  }
+
   return {
     init,
     getAll: () => songs.slice(),
     getById: (id) => songs.find(s => s.id === id) || null,
     addFiles,
     removeImported,
+    removeManyImported,
     clearImported,
+    setArtwork,
 
     getFavorites() { const favs = Prefs.getFavorites(); return songs.filter(s => favs.includes(s.id)); },
     getRecentlyAdded(limit = 12) { return songs.slice().sort((a, b) => b.dateAdded - a.dateAdded).slice(0, limit); },
@@ -242,6 +302,7 @@ const SongUI = (() => {
       <span class="song-row__index">
         <span class="index-num">${numbered ? (index + 1) : ''}</span>
         <span class="eq"><span></span><span></span><span></span></span>
+        <input type="checkbox" class="row-checkbox" aria-label="Select ${song.isBundled ? '' : song.title}" ${song.isBundled ? 'disabled title="Bundled songs can\'t be deleted"' : ''}>
       </span>
       <span class="song-row__art">${artInner(song)}<span class="preview-ring"></span></span>
       <span class="song-row__main">
@@ -264,11 +325,25 @@ const SongUI = (() => {
     if (showAlbum) row.querySelector('.song-row__album').textContent = song.album;
 
     const mainEl = row.querySelector('.song-row__main');
-    const playIt = () => { if (onPlay) onPlay(song); };
+    const playIt = () => {
+      const t = row.closest('.song-table');
+      if (t && t.classList.contains('is-select-mode')) {
+        const cb = row.querySelector('.row-checkbox');
+        if (!cb.disabled) { cb.checked = !cb.checked; cb.dispatchEvent(new Event('change')); }
+        return;
+      }
+      if (onPlay) onPlay(song);
+    };
     mainEl.addEventListener('click', playIt);
     row.querySelector('.song-row__art').addEventListener('dblclick', playIt);
 
     wireHoverPreview(row.querySelector('.song-row__art'), song);
+
+    row.querySelector('.row-checkbox').addEventListener('change', (e) => {
+      const t = row.closest('.song-table');
+      if (t) App.onRowCheckboxChange(t.id, song.id, e.target.checked);
+    });
+    row.querySelector('.row-checkbox').addEventListener('click', (e) => e.stopPropagation());
 
     row.querySelector('.fav-btn').addEventListener('click', (e) => {
       e.stopPropagation();
@@ -302,6 +377,7 @@ const SongUI = (() => {
 
   function renderTable(container, list, opts = {}) {
     container.innerHTML = '';
+    container._songs = list; // referenced by the selection/bulk-delete controller in app.js
     if (!list.length) {
       container.innerHTML = `<div class="list-empty">${opts.emptyText || 'No songs here yet.'}</div>`;
       return;

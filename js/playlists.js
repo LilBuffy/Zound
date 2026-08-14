@@ -1,4 +1,3 @@
-
 const Playlists = (() => {
   let activePlaylistId = null;
 

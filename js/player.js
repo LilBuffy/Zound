@@ -2,10 +2,6 @@ const Player = (() => {
   const audio = new Audio();
   audio.preload = 'metadata';
 
-  let audioCtx = null;
-  let gainNode = null;
-  let sourceNode = null;
-
   let queue = [];          // ordered array of song ids for the current play context
   let shuffleOrder = null; // shuffled id order, used when shuffle is on
   let posInQueue = -1;     // index into (shuffleOn ? shuffleOrder : queue)
@@ -17,21 +13,9 @@ const Player = (() => {
   function emit(evt, payload) { listeners[evt].forEach(fn => fn(payload)); }
   function on(evt, fn) { listeners[evt].push(fn); }
 
-  function ensureAudioGraph() {
-    if (audioCtx) return;
-    const Ctx = window.AudioContext || window.webkitAudioContext;
-    audioCtx = new Ctx();
-    sourceNode = audioCtx.createMediaElementSource(audio);
-    gainNode = audioCtx.createGain();
-    sourceNode.connect(gainNode).connect(audioCtx.destination);
-  }
-
   function applyVolume(percent, muted) {
-    ensureAudioGraph();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    const effective = muted ? 0 : percent;
-    audio.volume = Math.min(effective, 100) / 100;
-    gainNode.gain.value = effective > 100 ? effective / 100 : 1;
+    const clamped = Math.min(Math.max(percent, 0), 100);
+    audio.volume = muted ? 0 : clamped / 100;
   }
 
   function orderedIds() { return (shuffleOn && shuffleOrder) ? shuffleOrder : queue; }
@@ -53,7 +37,6 @@ const Player = (() => {
 
   async function loadAndPlay(song) {
     if (!song) return;
-    ensureAudioGraph();
     currentSong = song;
     audio.src = song.src;
     emit('songChange', song);
@@ -105,7 +88,6 @@ const Player = (() => {
 
     toggle() {
       if (!currentSong) return;
-      ensureAudioGraph();
       if (audio.paused) audio.play().catch(() => {}); else audio.pause();
     },
     pause() { audio.pause(); },
@@ -158,7 +140,7 @@ const Player = (() => {
     },
 
     // ---- Hover / tap preview: a short (~7s), separate Audio element so it
-    // never touches the main playback position or the boost gain graph. ----
+    // never touches the main playback position. ----
     _previewAudio: null,
     _previewTimer: null,
     playPreview(url, onFail) {

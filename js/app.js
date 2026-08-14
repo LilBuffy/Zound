@@ -4,6 +4,7 @@ const App = (() => {
   let openMenuEl = null;      // the currently-open "more" row menu, if any
   let isSeeking = false;
   let confirmCallback = null;
+  let songInfoCurrentSong = null;
 
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => Array.from(document.querySelectorAll(sel));
@@ -28,9 +29,10 @@ const App = (() => {
     $('#modalBackdrop').classList.remove('is-visible');
     $$('.modal').forEach(m => m.classList.remove('is-visible'));
   }
-  function confirmAction(title, body, onConfirm, danger = true) {
+  function confirmAction(title, body, onConfirm, confirmLabel = 'Confirm') {
     $('#modalConfirmTitle').textContent = title;
     $('#modalConfirmBody').textContent = body;
+    $('#btnConfirmAction').textContent = confirmLabel;
     confirmCallback = onConfirm;
     openModal('modalConfirm');
   }
@@ -58,10 +60,11 @@ const App = (() => {
 
     $$('.nav__item[data-view]').forEach(b => b.classList.toggle('is-active', b.dataset.view === view));
     $('#viewTitle').textContent = view === 'playlist' ? '' : VIEW_TITLES[view];
-    $('#mheaderTitle').textContent = view === 'playlist' ? 'Playlist' : (VIEW_TITLES[view] || 'MONO');
+    $('#mheaderTitle').textContent = view === 'playlist' ? 'Playlist' : (VIEW_TITLES[view] || 'Zound');
 
     closeMobileSidebar();
     closeRowMenu();
+    cancelAllSelections();
 
     if (view === 'home') renderHome();
     else if (view === 'all') renderAll();
@@ -102,13 +105,14 @@ const App = (() => {
       emptyText: 'No songs imported yet.',
       onPlay: (song) => Player.resumeOrPlay(song, list),
     });
+    syncSelectionCheckboxes('allSongsTable');
   }
 
   function renderRecent() {
     const list = LibraryData.getRecentlyPlayed();
     $('#recentCount').textContent = `${list.length} song${list.length === 1 ? '' : 's'}`;
     SongUI.renderTable($('#recentTable'), list, {
-      emptyText: 'Nothing played yet. Your history will show up here.',
+      emptyText: 'Nothing played yet — your history will show up here.',
       onPlay: (song) => Player.resumeOrPlay(song, list),
     });
   }
@@ -120,6 +124,7 @@ const App = (() => {
       emptyText: 'Favorite a song to see it here.',
       onPlay: (song) => Player.resumeOrPlay(song, list),
     });
+    syncSelectionCheckboxes('favoritesTable');
     $('#btnPlayFavorites').onclick = () => { if (list.length) Player.playSong(list[0], list); };
     $('#btnShuffleFavorites').onclick = () => {
       if (!list.length) return;
@@ -162,6 +167,7 @@ const App = (() => {
       <button data-act="add">Add to playlist</button>
       ${playlistId ? `<button data-act="remove">Remove from this playlist</button>` : ''}
       <button data-act="info">Song info</button>
+      ${!song.isBundled ? `<button data-act="artwork">Change artwork</button>` : ''}
       ${!song.isBundled ? `<div class="row-menu__divider"></div><button data-act="delete" class="danger">Delete from library</button>` : ''}
     `;
     row.appendChild(menu);
@@ -169,6 +175,8 @@ const App = (() => {
 
     menu.querySelector('[data-act="add"]').addEventListener('click', () => { closeRowMenu(); openAddToPlaylist(song); });
     menu.querySelector('[data-act="info"]').addEventListener('click', () => { closeRowMenu(); openSongInfo(song); });
+    const artworkBtn = menu.querySelector('[data-act="artwork"]');
+    if (artworkBtn) artworkBtn.addEventListener('click', () => { closeRowMenu(); promptArtworkChange(song); });
     const removeBtn = menu.querySelector('[data-act="remove"]');
     if (removeBtn) removeBtn.addEventListener('click', () => { closeRowMenu(); Playlists.removeSong(playlistId, song.id); showToast('Removed from playlist'); });
     const delBtn = menu.querySelector('[data-act="delete"]');
@@ -178,7 +186,7 @@ const App = (() => {
         await LibraryData.removeImported(song.id);
         showToast('Deleted from library');
         refreshCurrentView();
-      });
+      }, 'Delete');
     });
   }
   document.addEventListener('click', (e) => { if (openMenuEl && !openMenuEl.contains(e.target) && !e.target.closest('.more-btn')) closeRowMenu(); });
@@ -203,6 +211,7 @@ const App = (() => {
   }
 
   function openSongInfo(song) {
+    songInfoCurrentSong = song;
     const rows = [
       ['Title', song.title], ['Artist', song.artist], ['Album', song.album],
       ['Duration', formatDuration(song.duration)],
@@ -213,6 +222,37 @@ const App = (() => {
     $('#songInfoBody').innerHTML = rows.map(([k, v]) => `<div class="song-info__row"><span>${k}</span><span></span></div>`).join('');
     $$('#songInfoBody .song-info__row span:last-child').forEach((el, i) => { el.textContent = rows[i][1]; });
     openModal('modalSongInfo');
+  }
+
+  /* ---------------------------------------------------------------------
+   * Manual album artwork
+   * ------------------------------------------------------------------- */
+  let artworkTargetSong = null;
+  function promptArtworkChange(song) {
+    if (song.isBundled) { showToast("Bundled songs can't have custom artwork — edit MUSIC_LIBRARY in library.js instead."); return; }
+    artworkTargetSong = song;
+    $('#artworkInput').click();
+  }
+  function initArtwork() {
+    $('#artworkInput').addEventListener('change', async () => {
+      const file = $('#artworkInput').files[0];
+      $('#artworkInput').value = '';
+      if (!file || !artworkTargetSong) return;
+      if (!/^image\/(png|jpeg|webp)$/.test(file.type)) {
+        showToast('Please choose a JPG, PNG, or WEBP image.');
+        return;
+      }
+      const ok = await LibraryData.setArtwork(artworkTargetSong.id, file);
+      if (!ok) { showToast('Could not update artwork.'); return; }
+      showToast('Artwork updated');
+      if (Player.current && Player.current.id === artworkTargetSong.id) renderNowPlaying(Player.current);
+      if (songInfoCurrentSong && songInfoCurrentSong.id === artworkTargetSong.id) openSongInfo(artworkTargetSong);
+      refreshEverything();
+      artworkTargetSong = null;
+    });
+    $('#btnChangeArtwork').addEventListener('click', () => {
+      if (songInfoCurrentSong) promptArtworkChange(songInfoCurrentSong);
+    });
   }
 
   function refreshCurrentView() {
@@ -243,7 +283,7 @@ const App = (() => {
       Playlists.remove(id);
       showToast('Playlist deleted');
       navigateTo('home');
-    });
+    }, 'Delete');
   }
 
   /* ---------------------------------------------------------------------
@@ -256,7 +296,7 @@ const App = (() => {
     $('#nowArtist').textContent = song.artist;
     $('#playerArt').innerHTML = SongUI.artInner(song);
     $('#btnNowFav').classList.toggle('is-fav', Prefs.isFavorite(song.id));
-    document.title = `${song.title} · ${song.artist} — MONO`;
+    document.title = `${song.title} · ${song.artist} — Zound`;
     SongUI.refreshPlayingState();
   }
 
@@ -272,7 +312,7 @@ const App = (() => {
   function applyVolumeUI(percent, muted) {
     $('#volumeBar').value = percent;
     $('#volumeValue').textContent = muted ? 'Muted' : `${Math.round(percent)}%`;
-    fillPercent($('#volumeBar'), (percent / Number($('#volumeBar').max)) * 100);
+    fillPercent($('#volumeBar'), percent);
     $('#btnMute').classList.toggle('is-active', muted);
   }
 
@@ -318,14 +358,10 @@ const App = (() => {
       isSeeking = false;
     });
 
-    // Volume: 0–200%. Anything past 100 only actually applies if boost is
-    // enabled in Settings (see settings wiring below) — this keeps the
-    // 100%+ zone visible as a deliberate opt-in rather than a trap.
+    // Volume: plain 0–100%, applied directly to the audio element.
     const volumeBar = $('#volumeBar');
     volumeBar.addEventListener('input', () => {
-      const settings = Prefs.getSettings();
-      let val = Number(volumeBar.value);
-      if (!settings.boostEnabled && val > 100) { val = 100; volumeBar.value = 100; }
+      const val = Number(volumeBar.value);
       Prefs.saveSettings({ volume: val, muted: false });
       Player.setVolumePercent(val, false);
       applyVolumeUI(val, false);
@@ -357,6 +393,7 @@ const App = (() => {
     $('#btnImport').addEventListener('click', trigger);
     $('#btnMobileImport').addEventListener('click', trigger);
     $('#btnImportHero').addEventListener('click', trigger);
+    $('#btnImportTop').addEventListener('click', trigger);
     fileInput.addEventListener('change', () => { handleFiles(fileInput.files); fileInput.value = ''; });
 
     // Drag & drop, with a counter so nested dragenter/leave events (which
@@ -411,6 +448,20 @@ const App = (() => {
     $('#scrim').addEventListener('click', closeMobileSidebar);
   }
 
+  /** Collapsible sidebar: shrinks to an icon-only rail so the library can
+   *  use the full width of wide screens, with the choice remembered. */
+  function initSidebarCollapse() {
+    const collapsed = Prefs.getSettings().sidebarCollapsed;
+    $('#app').classList.toggle('sidebar-collapsed', collapsed);
+    $('#btnCollapseSidebar').addEventListener('click', () => {
+      const nowCollapsed = !$('#app').classList.contains('sidebar-collapsed');
+      $('#app').classList.toggle('sidebar-collapsed', nowCollapsed);
+      Prefs.saveSettings({ sidebarCollapsed: nowCollapsed });
+      $('#btnCollapseSidebar').setAttribute('aria-label', nowCollapsed ? 'Expand sidebar' : 'Collapse sidebar');
+      $('#btnCollapseSidebar').title = nowCollapsed ? 'Expand sidebar' : 'Collapse sidebar';
+    });
+  }
+
   function initKeyboardShortcuts() {
     document.addEventListener('keydown', (e) => {
       const tag = (e.target.tagName || '').toLowerCase();
@@ -448,28 +499,13 @@ const App = (() => {
    * ------------------------------------------------------------------- */
   function initSettings() {
     const settings = Prefs.getSettings();
-    $('#boostToggle').checked = settings.boostEnabled;
     $('#previewToggle').checked = settings.previewEnabled;
-    $('#volumeBar').max = settings.boostEnabled ? 200 : 100;
-
-    $('#boostToggle').addEventListener('change', (e) => {
-      const enabled = e.target.checked;
-      Prefs.saveSettings({ boostEnabled: enabled });
-      $('#volumeBar').max = enabled ? 200 : 100;
-      if (!enabled && Number($('#volumeBar').value) > 100) {
-        $('#volumeBar').value = 100;
-        $('#volumeBar').dispatchEvent(new Event('input'));
-      } else {
-        fillPercent($('#volumeBar'), (Number($('#volumeBar').value) / Number($('#volumeBar').max)) * 100);
-      }
-      showToast(enabled ? 'Volume boost enabled — up to 200%' : 'Volume boost disabled');
-    });
     $('#previewToggle').addEventListener('change', (e) => Prefs.saveSettings({ previewEnabled: e.target.checked }));
 
-    $('#btnClearHistory').addEventListener('click', () => confirmAction('Clear recently played?', 'Your playback history will be cleared.', () => { Prefs.clearRecent(); showToast('History cleared'); if (currentView === 'recent') renderRecent(); renderHome(); }, false));
+    $('#btnClearHistory').addEventListener('click', () => confirmAction('Clear recently played?', 'Your playback history will be cleared.', () => { Prefs.clearRecent(); showToast('History cleared'); if (currentView === 'recent') renderRecent(); renderHome(); }, 'Clear'));
     $('#btnClearRecent').addEventListener('click', () => $('#btnClearHistory').click());
-    $('#btnClearImported').addEventListener('click', () => confirmAction('Clear imported music?', 'All songs you imported from your device will be removed from this browser. This can\'t be undone.', async () => { await LibraryData.clearImported(); showToast('Imported music cleared'); refreshEverything(); }));
-    $('#btnResetAll').addEventListener('click', () => confirmAction('Reset all application data?', 'This clears playlists, favorites, history and settings, and removes imported music. This can\'t be undone.', async () => { await LibraryData.clearImported(); Prefs.resetAll(); showToast('Application reset'); location.reload(); }));
+    $('#btnClearImported').addEventListener('click', () => confirmAction('Clear imported music?', 'All songs you imported from your device will be removed from this browser. This can\'t be undone.', async () => { await LibraryData.clearImported(); showToast('Imported music cleared'); refreshEverything(); }, 'Clear'));
+    $('#btnResetAll').addEventListener('click', () => confirmAction('Reset all application data?', 'This clears playlists, favorites, history and settings, and removes imported music. This can\'t be undone.', async () => { await LibraryData.clearImported(); Prefs.resetAll(); showToast('Application reset'); location.reload(); }, 'Reset'));
   }
 
   function refreshEverything() {
@@ -479,6 +515,103 @@ const App = (() => {
     if (currentView === 'all') renderAll();
     if (currentView === 'favorites') renderFavorites();
     if (currentView === 'recent') renderRecent();
+    if (currentView === 'playlist') Playlists.openDetail(Playlists.getActiveId());
+  }
+
+  /* ---------------------------------------------------------------------
+   * Multi-select + bulk delete (All Songs, Favorites)
+   * ------------------------------------------------------------------- */
+  const selectionState = {}; // tableId -> Set of selected song ids
+  function selectionFor(tableId) { return selectionState[tableId] || (selectionState[tableId] = new Set()); }
+
+  function updateBulkBar(tableId) {
+    const count = selectionFor(tableId).size;
+    const bar = document.querySelector(`.bulk-bar[data-target="${tableId}"]`);
+    if (bar) {
+      bar.querySelector('.bulk-bar__count').textContent = `${count} selected`;
+      bar.querySelector('.bulk-delete').disabled = count === 0;
+    }
+  }
+
+  function onRowCheckboxChange(tableId, songId, checked) {
+    const set = selectionFor(tableId);
+    if (checked) set.add(songId); else set.delete(songId);
+    updateBulkBar(tableId);
+  }
+
+  /** Re-render (e.g. re-sorting) replaces row DOM nodes, which resets their
+   *  checkboxes to unchecked — this re-applies whatever was actually still
+   *  selected in selectionState so the UI doesn't silently drift out of
+   *  sync with what "Delete Selected" would actually act on. */
+  function syncSelectionCheckboxes(tableId) {
+    const table = document.getElementById(tableId);
+    if (!table || !table.classList.contains('is-select-mode')) return;
+    const set = selectionFor(tableId);
+    table.querySelectorAll('.song-row').forEach(row => {
+      const cb = row.querySelector('.row-checkbox');
+      if (cb) cb.checked = set.has(row.dataset.songId);
+    });
+    updateBulkBar(tableId);
+  }
+
+  function enterSelectMode(tableId) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    table.classList.add('is-select-mode');
+    selectionFor(tableId).clear();
+    updateBulkBar(tableId);
+    document.querySelector(`.bulk-bar[data-target="${tableId}"]`)?.classList.remove('hidden');
+    document.querySelector(`.btn-select-toggle[data-target="${tableId}"]`)?.classList.add('is-active');
+  }
+  function exitSelectMode(tableId) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    table.classList.remove('is-select-mode');
+    selectionFor(tableId).clear();
+    table.querySelectorAll('.row-checkbox').forEach(cb => { cb.checked = false; });
+    document.querySelector(`.bulk-bar[data-target="${tableId}"]`)?.classList.add('hidden');
+    document.querySelector(`.btn-select-toggle[data-target="${tableId}"]`)?.classList.remove('is-active');
+  }
+  function cancelAllSelections() {
+    $$('.song-table.is-select-mode').forEach(t => exitSelectMode(t.id));
+  }
+
+  function bulkSelectAll(tableId) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    const songs = (table._songs || []).filter(s => !s.isBundled);
+    const set = selectionFor(tableId);
+    songs.forEach(s => set.add(s.id));
+    table.querySelectorAll('.row-checkbox:not(:disabled)').forEach(cb => { cb.checked = true; });
+    updateBulkBar(tableId);
+  }
+
+  function bulkDeleteSelected(tableId) {
+    const ids = Array.from(selectionFor(tableId));
+    if (!ids.length) return;
+    const n = ids.length;
+    confirmAction(`Delete ${n} selected song${n === 1 ? '' : 's'}?`,
+      `They'll be removed from your library, playlists, favorites, and history. This can't be undone.`,
+      async () => {
+        await LibraryData.removeManyImported(ids);
+        showToast(`Deleted ${n} song${n === 1 ? '' : 's'}`);
+        exitSelectMode(tableId);
+        refreshEverything();
+      }, 'Delete');
+  }
+
+  function initSelection() {
+    $$('.btn-select-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.target;
+        const table = document.getElementById(id);
+        if (table && table.classList.contains('is-select-mode')) exitSelectMode(id);
+        else enterSelectMode(id);
+      });
+    });
+    $$('.bulk-cancel').forEach(btn => btn.addEventListener('click', () => exitSelectMode(btn.dataset.target)));
+    $$('.bulk-select-all').forEach(btn => btn.addEventListener('click', () => bulkSelectAll(btn.dataset.target)));
+    $$('.bulk-delete').forEach(btn => btn.addEventListener('click', () => bulkDeleteSelected(btn.dataset.target)));
   }
 
   /* ---------------------------------------------------------------------
@@ -520,7 +653,7 @@ const App = (() => {
     Player.setRepeat(settings.repeatMode);
     updateRepeatUI(settings.repeatMode);
     setShuffle(settings.shuffle);
-    applyVolumeUI(Math.min(settings.volume, settings.boostEnabled ? 200 : 100), settings.muted);
+    applyVolumeUI(Math.min(settings.volume, 100), settings.muted);
 
     initPlayerBar();
     initImport();
@@ -530,6 +663,9 @@ const App = (() => {
     initKeyboardShortcuts();
     initSettings();
     initModals();
+    initSidebarCollapse();
+    initArtwork();
+    initSelection();
 
     $$('.nav__item[data-view]').forEach(btn => btn.addEventListener('click', () => navigateTo(btn.dataset.view)));
 
@@ -541,6 +677,6 @@ const App = (() => {
 
   return {
     navigateTo, showPreviewHint, onFavoritesChanged, openRowMenu, setShuffle,
-    startRenamePlaylist, confirmDeletePlaylist,
+    startRenamePlaylist, confirmDeletePlaylist, onRowCheckboxChange,
   };
 })();

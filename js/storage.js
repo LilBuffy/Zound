@@ -41,6 +41,14 @@ const Store = (() => {
         req.onerror = () => rej(req.error);
       });
     },
+    async get(id) {
+      const { store } = await tx('readonly');
+      return new Promise((res, rej) => {
+        const req = store.get(id);
+        req.onsuccess = () => res(req.result || null);
+        req.onerror = () => rej(req.error);
+      });
+    },
     async delete(id) {
       const { t, store } = await tx('readwrite');
       store.delete(id);
@@ -62,12 +70,12 @@ const Prefs = (() => {
     recent: 'mono_recent',
   };
   const DEFAULT_SETTINGS = {
-    volume: 100,       // 0–200, applied via player.js
-    boostEnabled: false,
+    volume: 100,       // 0–100, applied directly via audio.volume
     shuffle: false,
     repeatMode: 'off',  // 'off' | 'all' | 'one'
     previewEnabled: true,
     muted: false,
+    sidebarCollapsed: true,
   };
   const RECENT_LIMIT = 60;
 
@@ -132,6 +140,18 @@ const Prefs = (() => {
       write(KEYS.recent, list);
     },
     clearRecent() { write(KEYS.recent, []); },
+
+    /** Cascade cleanup after song(s) are deleted from the library: strips
+     *  those ids out of favorites, recently-played history, and every
+     *  playlist, so nothing references a song that no longer exists. */
+    purgeSongIds(ids) {
+      const idSet = new Set(ids);
+      write(KEYS.favorites, this.getFavorites().filter(id => !idSet.has(id)));
+      write(KEYS.recent, this.getRecent().filter(r => !idSet.has(r.id)));
+      const playlists = this.getPlaylists();
+      playlists.forEach(p => { p.songIds = p.songIds.filter(id => !idSet.has(id)); });
+      this.savePlaylists(playlists);
+    },
 
     resetAll() {
       Object.values(KEYS).forEach(k => localStorage.removeItem(k));
