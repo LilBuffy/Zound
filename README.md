@@ -1,37 +1,44 @@
 # 🎵 Zound
 
-Spotify kept throwing ads at me, so I said fuck it and built my own music player.
+Spotify kept throwing ads at me, so sabi ko:
 
-Zound is a modern, minimalist, monochrome music player designed for listening to your own music without advertisements, accounts, subscriptions, or unnecessary bullshit.
+**Fuck it. Gagawa ako ng sarili kong music player.**
 
-Built entirely with **HTML, CSS, and Vanilla JavaScript**, Zound provides a personal music library directly in the browser.
+**Zound** ay isang fucking music player para sa sarili mong music, walang ads, accounts, subscriptions, at unnecessary bullshit.
 
-🟢 Project Status
+Built gamit ang **HTML, CSS, at Vanilla JavaScript**.
 
-STILL WORKING / BUT ABANDONED
+## 🟢 Project Status
+
+**STILL WORKING / BUT ABANDONED**
 
 Click me: https://lilbuffy.github.io/Zound/
 
-Zound is no longer actively developed, but the current version is still functional and usable.
+Hindi na actively developed, pero gumagana pa rin ang current version.
 
-The project is online, the music player still works, and the existing features are still available.
+Online pa. Buhay pa. Nagpapatugtog pa.
 
-### 🎵 Test Tracks
+**Пока живой, братан.**
 
-I've added **5 of my FAVORITE songs** for you to try out Zound. (All tracks are from **The Birthday Massacre**)
+## 🎵 Test Tracks
 
-| File                     | Artist                | Album                    | Year |
-| ------------------------ | --------------------- | ------------------------ | ---: |
-| **Sleep Tonight.mp3**    | The Birthday Massacre | *Pathways*               | 2025 |
-| **Sleepwalking.mp3**     | The Birthday Massacre | *Pins and Needles*       | 2010 |
-| **Pins And Needles.mp3** | The Birthday Massacre | *Pins and Needles*       | 2010 |
-| **Red Stars.mp3**        | The Birthday Massacre | *Walking With Strangers* | 2007 |
-| **In The Dark.mp3**      | The Birthday Massacre | *Pins and Needles*       | 2010 |
+May **5 favorite songs** ko akong nilagay para ma test ang Zound.
 
+Lahat galing sa **The Birthday Massacre**.
+
+| Song                 | Album                    | Year |
+| -------------------- | ------------------------ | ---: |
+| **Sleep Tonight**    | *Pathways*               | 2025 |
+| **Sleepwalking**     | *Pins and Needles*       | 2010 |
+| **Pins And Needles** | *Pins and Needles*       | 2010 |
+| **Red Stars**        | *Walking With Strangers* | 2007 |
+| **In The Dark**      | *Pins and Needles*       | 2010 |
 
 ## 🎵 Personal Music Library
 
-Import and manage your own music files directly through the browser. Supported formats depend on browser compatibility, including:
+Pwede mag import at mag manage ng sarili mong music.
+
+Supported formats depende sa browser:
 
 * MP3
 * M4A
@@ -39,25 +46,24 @@ Import and manage your own music files directly through the browser. Supported f
 * OGG
 * AAC
 
-Your music stays on your device instead of being uploaded to some random server.
+Music stays on your device.
+
+Walang random server na pag a uploadan ng shit mo.
 
 ## 📂 Playlists
 
-Create and organize playlists however you want.
+Pwede:
 
-You can:
-
-* Create playlists
-* Rename playlists
-* Delete playlists
-* Add songs
-* Remove songs
-* Play entire playlists
-* Shuffle playlists
+* Gumawa ng playlists
+* Mag rename
+* Mag delete
+* Mag add at remove ng songs
+* Mag play ng buong playlist
+* Mag shuffle
 
 ## 🔀 Playback Controls
 
-Zound includes:
+May:
 
 * Play / Pause
 * Previous / Next
@@ -66,43 +72,45 @@ Zound includes:
 * Repeat all
 * Repeat one
 * Volume control
-* Volume boost up to 200%
+* Volume boost hanggang 200%
 
 ## 🔎 Music Search
 
-Search your local library by:
+Search gamit ang:
 
 * Song title
 * Artist
 * Album
 
-Useful when your library contains approximately 500 songs and scrolling through all of them starts becoming **pizdets**.
+Useful kapag may 500 songs ka na at ang pag scroll ay naging **pizdets**.
 
 ## ❤️ Favorites
 
-Mark songs as favorites and access them through a dedicated **Favorites** section.
+I favorite ang songs na gusto mo at hanapin agad sa **Favorites**.
 
-No need to dig through your entire library just to find the one song you actually want to hear.
+Hindi na kailangan hukayin buong library para sa isang kanta.
 
 ## 🕘 Recently Played
 
-Zound keeps track of recently played songs locally. This allows you to quickly return to music you've listened to recently.
+Nagse save locally ng recently played songs.
 
-No account required. No server required. No fucking tracking.
+Walang account. Walang server.
+
+**Walang fucking tracking.**
 
 ## 🖱️ Song Preview
 
-On desktop, hovering over a song can trigger a short preview when supported by the browser.
+Sa desktop, may song preview kapag nag hover kung supported ng browser.
 
-On devices without hover, an alternative preview interaction is provided.
+Sa devices na walang hover, may alternative interaction.
 
-Browser autoplay restrictions are respected instead of trying to perform some cursed workaround.
+Browser autoplay restrictions are respected.
 
-**The browser says no, Zound says okay blyat.**
+**Browser says no, Zound says okay blyat.**
 
 ## 💾 Local Storage
 
-Zound can remember things such as:
+Naaalala nito ang:
 
 * Playlists
 * Favorites
@@ -110,36 +118,7 @@ Zound can remember things such as:
 * Playback preferences
 * Volume settings
 
-~~Temperature... wait, wrong project. 💀~~
-
-The application uses browser storage instead of requiring a backend database.
-
-## 📱 Responsive Design
-
-Zound is designed for:
-
-* Desktop
-* Laptop
-* Tablet
-* Mobile
-
-## 🎨 Design
-
-Zound uses a black, white, and monochrome visual style.
-
-No:
-
-* Spotify green
-* Colorful gradients
-* Advertising banners
-* Unnecessary popups
-* Visual clutter
-
-The goal is simple:
-
-**Open Zound → pick music → fucking listen.**
-
-The interface uses modern typography, subtle animations, smooth transitions, minimal borders, and responsive layouts.
+Walang backend database bullshit.
 
 ## 🛠️ Technology
 
@@ -149,9 +128,3 @@ The interface uses modern typography, subtle animations, smooth transitions, min
 * Web Audio API
 * LocalStorage
 * IndexedDB
-
-Organize it.
-
-Press play.
-
-**Blyat, enjoy.**
