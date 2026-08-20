@@ -2,17 +2,19 @@
 
 Spotify kept throwing ads at me, so sabi ko:
 
-**Fuck it. Gagawa ako ng sarili kong music player.**
+**FUCK IT. Gagawa ako ng sarili kong music player.**
 
-**Zound** ay isang fucking music player para sa sarili mong music, walang ads, accounts, subscriptions, at unnecessary bullshit.
+**Zound** is a fucking music player for your own music, walang ads, accounts, subscriptions, or unnecessary bullshit.
 
-Built gamit ang **HTML, CSS, at Vanilla JavaScript**.
+Built with **HTML, CSS, and Vanilla JavaScript**.
 
 ## 🟢 Project Status
 
 **STILL WORKING / BUT ABANDONED**
 
-Click me: https://lilbuffy.github.io/Zound/
+CLICK ME: https://lilbuffy.github.io/Zound/
+
+🚨 YOUR ANTIVIRUS MAY FLAG THIS WEBSITE AS SUSPICIOUS, BUT RELAX, I'M NOT TRYING TO STEAL YOUR FUCKING MP3S. 🚨
 
 Hindi na actively developed, pero gumagana pa rin ang current version.
 
@@ -22,9 +24,7 @@ Online pa. Buhay pa. Nagpapatugtog pa.
 
 ## 🎵 Test Tracks
 
-May **5 favorite songs** ko akong nilagay para ma test ang Zound.
-
-Lahat galing sa **The Birthday Massacre**.
+May **5 favorite songs** ako na gisalpak from **The Birthday Massacre** para ma test ang Zound.
 
 | Song                 | Album                    | Year |
 | -------------------- | ------------------------ | ---: |
@@ -36,77 +36,68 @@ Lahat galing sa **The Birthday Massacre**.
 
 ## 🎵 Personal Music Library
 
-Pwede mag import at mag manage ng sarili mong music.
+Supported formats depend on the browser:
 
-Supported formats depende sa browser:
+* 🎵 MP3
+* 🎵 M4A
+* 🎵 WAV
+* 🎵 OGG
+* 🎵 AAC
 
-* MP3
-* M4A
-* WAV
-* OGG
-* AAC
-
-Music stays on your device.
-
-Walang random server na pag a uploadan ng shit mo.
+Music stays on your device. **Walang random server na pag a uploadan ng shit mo.**
 
 ## 📂 Playlists
 
-Pwede:
+* Create playlists
+* Rename playlists
+* Delete playlists
+* Add and remove songs
+* Play entire playlists
+* Shuffle
 
-* Gumawa ng playlists
-* Mag rename
-* Mag delete
-* Mag add at remove ng songs
-* Mag play ng buong playlist
-* Mag shuffle
+Basically, **ikaw ang DJ ng sarili mong kalat.** БЛЯТЬ.
 
 ## 🔀 Playback Controls
 
-May:
+* ▶️ Play / Pause
+* ⏮️ Previous / Next
+* ⏩ Song seeking
+* 🔀 Shuffle
+* 🔁 Repeat all / one
+* 🔊 Volume control
+* 🔊 Volume boost hanggang **200%**
 
-* Play / Pause
-* Previous / Next
-* Song seeking
-* Shuffle
-* Repeat all
-* Repeat one
-* Volume control
-* Volume boost hanggang 200%
+Yes, **200%**. Para masira ang tenga mo professionally.
 
 ## 🔎 Music Search
 
-Search gamit ang:
+Search by:
 
 * Song title
 * Artist
 * Album
 
-Useful kapag may 500 songs ka na at ang pag scroll ay naging **pizdets**.
+Useful kapag may 500 songs ka na at ang pag scroll ay naging **ПИЗДЕЦ.**
 
 ## ❤️ Favorites
 
-I favorite ang songs na gusto mo at hanapin agad sa **Favorites**.
+Favorite your songs and find them instantly in **Favorites**.
 
-Hindi na kailangan hukayin buong library para sa isang kanta.
+No need hukayin ang buong library para sa isang kanta.
 
 ## 🕘 Recently Played
 
-Nagse save locally ng recently played songs.
-
-Walang account. Walang server.
-
-**Walang fucking tracking.**
+Recently played songs are saved locally. No account. No server. **NO FUCKING TRACKING.**
 
 ## 🖱️ Song Preview
 
-Sa desktop, may song preview kapag nag hover kung supported ng browser.
+Desktop users can preview songs on hover when supported.
 
-Sa devices na walang hover, may alternative interaction.
+Devices without hover get an alternative interaction.
 
 Browser autoplay restrictions are respected.
 
-**Browser says no, Zound says okay blyat.**
+**Browser says NO, Zound says OKAY БЛЯТЬ.**
 
 ## 💾 Local Storage
 
@@ -118,7 +109,9 @@ Naaalala nito ang:
 * Playback preferences
 * Volume settings
 
-Walang backend database bullshit.
+No backend database bullshit.
+
+**Your music, your device, your fucking rules.**
 
 ## 🛠️ Technology
 
@@ -128,3 +121,5 @@ Walang backend database bullshit.
 * Web Audio API
 * LocalStorage
 * IndexedDB
+
+**Basically Spotify kung tinanggal mo ang ads, subscriptions, accounts, at corporate bullshit. Verdammt.**
