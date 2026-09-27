@@ -12,7 +12,7 @@ Zound is a fucking browser based music player built with **HTML, CSS, and Vanill
 
 Zound supports local music playback for formats supported by the browser, including **MP3, M4A, WAV, OGG, and AAC**. You can create, rename, and delete playlists, add or remove songs, play entire playlists, shuffle tracks, favorite songs, search by title, artist, or album, and view recently played tracks. Basically, kung may 500 songs ka na at naging fucking archaeological expedition na ang paghanap ng isang kanta, may search na.
 
-Playback controls include play and pause, previous and next tracks, seeking, shuffle, repeat all or one, volume control, and volume boost up to **200%**. Desktop users can also preview songs on hover when supported, while devices without hover get an alternative interaction. Browser autoplay restrictions are respected because apparently browsers also enjoy telling developers **NO**.
+Playback controls include play and pause, previous and next tracks, seeking, shuffle, repeat all or one, and volume control. Desktop users can also preview songs on hover when supported, while devices without hover get an alternative interaction. Browser autoplay restrictions are respected because apparently browsers also enjoy telling developers **NO**.
 
 ## Local Data
 
@@ -26,10 +26,4 @@ No giant framework. No backend. No database server. Just browser APIs doing the 
 
 ## Test Library
 
-The project includes a small test library containing five tracks from **The Birthday Massacre** that were used during development and testing. These tracks are only there as test content for the player.
-
-## In Short
-
-**Your music. Your browser. Your playlists. Your fucking rules.**
-
-Zound started with one simple thought: **I fucking hated Spotify ads, so I built my own music player.**
+The project includes a small test library containing my favorite five tracks from **The Birthday Massacre** that were used during development and testing. These tracks are only there as test content for the player.
